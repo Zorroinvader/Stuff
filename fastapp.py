@@ -1,73 +1,117 @@
 import time
 import pyautogui
-import json
 import sqlite3
+import json
 import os
+# Reminder:
+# Create a function wchit Generates a new Preset with the name given by the user 
+#The new Preset should be added to the database and can be used in the future as a normal bootup list
+# Presets can be replace with new Presets and deleted by the user 
+# Ideas:
+# 1. Bootup with Windows
+# 2. Bootup with a Preset
+tablename = 'applist'
+db_name = 'your_db_name.db'
+default_list = ['app1', 'app2', 'app3', 'app4']  # Replace with your default list
+if not os.path.exists(db_name):
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS applist (
+        name TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+        )   
+        """)
+    cursor.execute("INSERT INTO applist (name, value) VALUES (?, ?)", ('my_list', json.dumps(default_list)))
+    conn.commit()
+    conn.close()
 
-conn = sqlite3.connect("myDatabase.db")
-cursor = conn.cursor()
-if os.path.exists("myDatabase.db"):
-    print("myDatabase.db exists")
+class MyList:
+    def __init__(self, db_name):
+        self.db_name = db_name
+        self.conn = sqlite3.connect(self.db_name)
+        self.cursor = self.conn.cursor()
+        self.my_list = self.get_my_list()
 
-else:
-    cursor.execute('''CREATE TABLE  IF NOT EXISTS applist (
-        id INTEGER  PRIMARY KEY,
-        data TEXT
-        )''')
-    print("Database created")
+    def get_my_list(self, Preset):
+        self.cursor.execute("SELECT value FROM applist WHERE name=?", (Preset,))
+        result = self.cursor.fetchone()
+        if result:
+            return json.loads(result[0])  # Convert JSON string back to Python object
+        else:
+            return []
+
+    def update_my_list(self, new_list, preset):
+        self.my_list = new_list
+        self.cursor.execute("UPDATE applist SET value=? WHERE name=?", (json.dumps(new_list), preset))
+        self.conn.commit()
+    def create_preset(self):
+        new_presetname = input("Type the name of the new Preset: ")
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS """ + new_presetname +""" (
+        name TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+        )   
+        """)
+        my_list_instance = MyList(db_name)
+        new_presetname_list = my_list_instance.get_my_list(new_presetname)
+        for i in len(new_presetname_list):
+             appchange = input("Type the name of the app that you want to add hear:")
+             new_presetname[i] = appchange
+             my_list_instance.update_my_list(new_presetname, )
+             print(new_presetname = new_presetname_list)
+             
+    def close(self):
+        self.conn.close()
+        
+
+
 
 
 def openapp():
+    my_list_instance = MyList(db_name)  # Replace 'your_db_name.db' with the actual name of your database file
+    retrieved_list = default_presetlist1
+    templist = retrieved_list
+    default_presetlist1 = retrieved_list("my_list")
+    try:
+        preset1 = my_list_instance.get_my_list(preset1_name)
+        preset2 = my_list_instance.get_my_list(preset2_name)
+        preset3 = my_list_instance.get_my_list(preset3_name)
+    except Exception as e:
+        print("Error while retrieving presets:", e)
 
+    print(retrieved_list)
 
-    cursor.execute("SELECT data FROM applist")
-    rows = cursor.fetchall()
-    retrievef_List = json.loads(rows[0][1])
-    favapplist = (retrievef_List)
-
-
-    list_json = json.dumps(favapplist)
-    def addlisttodb(list):
-        cursor.execute("INSERT INTO applist (id) Values (?)", (0,))
-        cursor.execute("INSERT INTO applist (data) VALUES (?)", (list,))
-        conn.commit()
-
-    addlisttodb(list_json)
-    def presetedit():
-        print("not defien yet")
-    def changeappindb(appchange):
-        cursor.execute("SELECT data FROM applist WHERE id = ?", (1,))
-        data = cursor.fetchone()[0]
-        my_list = json.loads(data)
-        my_list.append(appchange)
-        modified_data = json.dumps(my_list)
-        cursor.execute("UPDATE applist SET data = ? WHERE id = ?", (modified_data, 1))
-        conn.commit()
+    def exit():
+        exit()
     def favapplistedit(favapplist):
         answer_app_add = input("Which Apps changed?")
 
         if answer_app_add == "1":
             appchange = input("Type the name of the app that you want to add hear:")
-
-            favapplist[0] = appchange
-            changeappindb(appchange)
-            startmenu(favapplist)
+            templist[0] = appchange
+            my_list_instance.update_my_list(templist, )
+            startmenu(retrieved_list)
+            
         elif answer_app_add == "2":
             appchange = input("Type the name of the app that you want to add hear:")
-            favapplist[1] = appchange
-            changeappindb(appchange)
-            startmenu(favapplist)
+            retrieved_list[1] = appchange
+            my_list_instance.update_my_list(templist)   
+            startmenu(retrieved_list)
         elif answer_app_add == "3":
             appchange = input("Type the name of the app that you want to add hear:")
-            favapplist[2] = appchange
-            changeappindb(appchange)
-            startmenu(favapplist)
+            retrieved_list[2] = appchange
+            my_list_instance.update_my_list(templist)  
+            startmenu(retrieved_list)
         elif answer_app_add == "4":
             appchange = input("Type the name of the app that you want to add hear:")
-            favapplist[3] = appchange
-            changeappindb(appchange)
-            startmenu(favapplist)
-
+            retrieved_list[3] = appchange
+            my_list_instance.update_my_list(templist)
+            startmenu(retrieved_list)
+        else:
+            print("Only Apps can be Edited")
+            favapplistedit(retrieved_list)
     def launchapp(Appname):
         try:
             pyautogui.hotkey("Winleft", "s")
@@ -75,27 +119,36 @@ def openapp():
             pyautogui.write(Appname)
             time.sleep(0.01)
             pyautogui.hotkey("enter")
+            time.sleep(1)
         except Exception as e:
             print("Fehler beim Öffnen der Anwendung:", e)
-
-    def startmenu(favapplist):
-        print("[1]" + favapplist[0] + "[2]" + favapplist[1] + "[3]" + favapplist[2] + "[4]" + favapplist[
-            3] + "[5]Presets [6] add App to Favorite")
+    def openall():
+        for app in retrieved_list:
+            launchapp(app)
+    def presetedit():
+        print("Preset 1: " + str(preset1))
+    def startmenu(retrieved_list):
+        print("[1]" + retrieved_list[0] + "[2]" + retrieved_list[1] + "[3]" + retrieved_list[2] + "[4]" + retrieved_list[
+            3] + "[5]Presets [6] add App to Favorite [7] Open all [8] Exit")
         answer = input("Which Apps should be open?")
         if answer == "1":
-            launchapp(favapplist[0])
+            launchapp(retrieved_list[0])
         elif answer == "2":
-            launchapp(favapplist[1])
+            launchapp(retrieved_list[1])
         elif answer == "3":
-            launchapp(favapplist[2])
+            launchapp(retrieved_list[2])
         elif answer == "4":
-            launchapp(favapplist[3])
+            launchapp(retrieved_list[3])
         elif answer == "5":
             presetedit()
         elif answer == "6":
-            favapplistedit(favapplist)
+            favapplistedit(retrieved_list)
+        elif answer == "7":
+            openall()
+        elif answer == "8":
+            exit()
 
-    startmenu(favapplist)
+    startmenu(templist)
 
 
 def shutdown():
@@ -133,13 +186,16 @@ def shutdown():
             time.sleep(0.5)
             if i == timesettoshutdown - 1:
                 pyautogui.hotkey('Winleft', "d")
-                time.sleep(0.001)
+                time.sleep(0.1)
                 pyautogui.hotkey("alt", "f4")
-                time.sleep(0.001)
+                time.sleep(0.1)
                 pyautogui.hotkey("tab")
                 # pyautogui.hotkey("tab")
-                time.sleep(0.001)
+                time.sleep(0.1)
                 pyautogui.hotkey("enter")
+                for num in range(100):
+                    print(num)
+                    pyautogui.hotkey("enter")
 
 
     except Exception as e:
@@ -150,7 +206,6 @@ print(
     "[1] Shutdown"
     "[2] Open apps"
 )
-
 answer = input("What do you want")
 if answer == "1":
     shutdown()
