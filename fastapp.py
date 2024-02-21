@@ -70,8 +70,19 @@ class MyList:
 
 
 def openapp():
+    print("[1]"+ preset1_name + "[2]" + preset2_name + "[3]" + preset3_name)
+    selected_Preset = input("Which Preset do you want to use?")
+    if selected_Preset == "1":
+        selected_Preset = "preset1"
+    elif selected_Preset == "2":
+        selected_Preset = "preset2"
+    elif selected_Preset == "3":
+        selected_Preset = "preset3"
+    else:
+        print("Only 3 Presets are Currently available please choose anothe one")
+        openapp()
     my_list_instance = MyList(db_name)  # Replace 'your_db_name.db' with the actual name of your database file
-    retrieved_list = default_presetlist1
+    retrieved_list = selected_Preset
     templist = retrieved_list
     default_presetlist1 = retrieved_list("my_list")
     try:
